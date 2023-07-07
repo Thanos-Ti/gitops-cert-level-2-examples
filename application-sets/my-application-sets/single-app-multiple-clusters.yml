@@ -1,19 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: billing-application-set
+  name: multi-cluster-application-set
   namespace: argocd
 spec:
   generators:
-  - list:
-      elements:
-      - namespace: team-a
-      - namespace: team-b
-      - namespace: team-c
-      - namespace: staging
+  - clusters: {} # Automatically use all clusters defined within Argo CD
   template:      
     metadata:
-      name: '{{namespace}}-billing'
+      name: '{{name}}-billing-app'
     spec:
       # The project the application belongs to.
       project: default
@@ -26,8 +21,8 @@ spec:
       
       # Destination cluster and namespace to deploy the application
       destination:
-        server: https://kubernetes.default.svc
-        namespace: '{{namespace}}'
+        server: '{{server}}'
+        namespace: billing
 
       # Sync policy
       syncPolicy:
@@ -36,4 +31,3 @@ spec:
         automated: # automated sync by default retries failed attempts 5 times with following delays between attempts ( 5s, 10s, 20s, 40s, 80s ); retry controlled using `retry` field.
           prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
           selfHeal: true # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
-      
